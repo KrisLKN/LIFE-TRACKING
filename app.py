@@ -141,8 +141,24 @@ page_labels = [f"{emoji} {label}" for emoji, _, label in page_options]
 page = st.sidebar.radio("Choisir une page", page_labels, index=0)
 
 # Extraire le nom de la page pour les comparaisons
-page_index = page_labels.index(page) if page in page_labels else 0
-current_page = page_options[page_index][2]  # Le label (nom de la page)
+try:
+    page_index = page_labels.index(page) if page in page_labels else 0
+    if page_index >= len(page_options):
+        page_index = 0
+    current_page = page_options[page_index][2]  # Le label (nom de la page)
+except (IndexError, ValueError) as e:
+    logger.error(f"Erreur lors de l'extraction de la page: {e}")
+    current_page = "Dashboard"
+
+# Fonction helper pour opérations DB sécurisées
+def safe_db_operation(operation, default_value=None):
+    """Exécute une opération DB de manière sécurisée avec fallback"""
+    try:
+        result = operation()
+        return result if result is not None else default_value
+    except Exception as e:
+        logger.error(f"Erreur opération DB: {e}")
+        return default_value if default_value is not None else ([] if isinstance(default_value, list) else None)
 
 # Fonction helper pour subheader avec icône
 def subheader_with_icon(icon_name, text):
@@ -619,7 +635,11 @@ elif current_page == "Tableau de Bord":
         </h2>
     """, unsafe_allow_html=True)
     
-    events = db.get_all_events()
+    try:
+        events = db.get_all_events() or []
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des événements: {e}")
+        events = []
     
     if not events:
         st.info("📝 Aucun événement enregistré. Commencez par ajouter un événement!")
@@ -717,7 +737,11 @@ elif current_page == "Statistiques":
         </h2>
     """, unsafe_allow_html=True)
     
-    events = db.get_all_events()
+    try:
+        events = db.get_all_events() or []
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des événements: {e}")
+        events = []
     
     if not events:
         st.info("📝 Aucune donnée disponible. Ajoutez des événements pour voir les statistiques!")
@@ -1170,7 +1194,11 @@ elif current_page == "Export":
         </h2>
     """, unsafe_allow_html=True)
     
-    events = db.get_all_events()
+    try:
+        events = db.get_all_events() or []
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des événements: {e}")
+        events = []
     
     if not events:
         st.info("Aucune donnée à exporter")
@@ -1565,7 +1593,7 @@ elif current_page == "École":
         # Ajouter un devoir
         with st.expander("➕ Ajouter un Devoir", expanded=False):
             assignment_title = st.text_input("Titre", key="assign_title")
-            courses = db.get_all_courses()
+            courses = safe_db_operation(lambda: db.get_all_courses(), [])
             course_options = {0: "Aucun"}
             course_options.update({c.get('id'): c.get('name') for c in courses})
             selected_course_id = st.selectbox("Cours associé", options=list(course_options.keys()), 
@@ -1601,7 +1629,7 @@ elif current_page == "École":
         with col3:
             view_mode = st.radio("Vue", ["Liste", "Kanban"], horizontal=True, key="assign_view")
         
-        all_assignments = db.get_all_assignments()
+        all_assignments = safe_db_operation(lambda: db.get_all_assignments(), [])
         
         # Filtrage
         assignments = all_assignments.copy()
@@ -1852,7 +1880,7 @@ elif current_page == "Second Cerveau":
                 st.rerun()
         
         # Liste des liens
-        links = db.get_all_links()
+        links = safe_db_operation(lambda: db.get_all_links(), [])
         if links:
             for link in links:
                 with st.expander(f"🔗 {link.get('title', '')}"):
@@ -1892,7 +1920,7 @@ elif current_page == "Second Cerveau":
                 st.rerun()
         
         # Liste des éléments
-        items = db.get_all_knowledge_items()
+        items = safe_db_operation(lambda: db.get_all_knowledge_items(), [])
         if items:
             for item in items:
                 with st.expander(f"💡 {item.get('title', '')} - {item.get('type', '')}"):
