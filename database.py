@@ -46,13 +46,68 @@ class Database:
     
     def _create_connection(self):
         """Crée une nouvelle connexion à la base de données"""
-        self.conn = sqlite3.connect(self.db_file, check_same_thread=False)
+        self.conn = sqlite3.connect(self.db_file, check_same_thread=False, timeout=10.0)
         self.conn.row_factory = sqlite3.Row
         # Activer les foreign keys (même si on ne les utilise plus, c'est bon pour la compatibilité)
         try:
             self.conn.execute("PRAGMA foreign_keys = ON")
         except:
             pass  # Ignorer si non supporté
+    
+    def _execute_query(self, query: str, params: tuple = None, fetch: bool = False, commit: bool = False):
+        """
+        Exécute une requête SQL de manière robuste avec gestion d'erreurs
+        
+        Args:
+            query: Requête SQL à exécuter
+            params: Paramètres pour la requête
+            fetch: Si True, retourne les résultats (fetchall)
+            commit: Si True, commit la transaction
+            
+        Returns:
+            Résultats de la requête si fetch=True, sinon None
+        """
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                conn = self.get_connection()
+                cursor = conn.cursor()
+                
+                if params:
+                    cursor.execute(query, params)
+                else:
+                    cursor.execute(query)
+                
+                if commit:
+                    conn.commit()
+                
+                if fetch:
+                    return cursor.fetchall()
+                else:
+                    return cursor.lastrowid if cursor.lastrowid else None
+                    
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError) as e:
+                # Erreur de connexion ou SQL - réessayer avec nouvelle connexion
+                if attempt < max_retries - 1:
+                    logger.warning(f"Erreur SQL (tentative {attempt + 1}/{max_retries}): {e}. Nouvelle tentative...")
+                    try:
+                        if self.conn:
+                            self.conn.close()
+                    except:
+                        pass
+                    self.conn = None
+                    continue
+                else:
+                    logger.error(f"Erreur SQL après {max_retries} tentatives: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"Erreur inattendue lors de l'exécution de la requête: {e}")
+                if commit:
+                    try:
+                        conn.rollback()
+                    except:
+                        pass
+                raise
     
     def init_database(self):
         """Initialise toutes les tables de la base de données"""
@@ -661,27 +716,29 @@ class Database:
     
     def get_all_events(self, filters: Optional[Dict] = None) -> List[Dict]:
         """Récupère tous les événements avec filtres optionnels"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        query = "SELECT * FROM events WHERE 1=1"
-        params = []
-        
-        if filters:
-            if filters.get('type'):
-                query += " AND type LIKE ?"
-                params.append(f"%{filters['type']}%")
-            if filters.get('date_from'):
-                query += " AND date >= ?"
-                params.append(filters['date_from'])
-            if filters.get('date_to'):
-                query += " AND date <= ?"
-                params.append(filters['date_to'])
-        
-        query += " ORDER BY datetime DESC"
-        
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
+        try:
+            query = "SELECT * FROM events WHERE 1=1"
+            params = []
+            
+            if filters:
+                if filters.get('type'):
+                    query += " AND type LIKE ?"
+                    params.append(f"%{filters['type']}%")
+                if filters.get('date_from'):
+                    query += " AND date >= ?"
+                    params.append(filters['date_from'])
+                if filters.get('date_to'):
+                    query += " AND date <= ?"
+                    params.append(filters['date_to'])
+            
+            query += " ORDER BY datetime DESC"
+            
+            rows = self._execute_query(query, tuple(params) if params else None, fetch=True)
+            if rows is None:
+                return []
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération des événements: {e}")
+            return []
         
         events = []
         for row in rows:
@@ -951,16 +1008,21 @@ class Database:
     
     def get_all_exams(self, upcoming_only: bool = False) -> List[Dict]:
         """Récupère tous les examens"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        if upcoming_only:
-            today = datetime.now().date().isoformat()
-            cursor.execute("SELECT * FROM exams WHERE exam_date >= ? ORDER BY exam_date, exam_time", (today,))
-        else:
-            cursor.execute("SELECT * FROM exams ORDER BY exam_date, exam_time")
-        
-        return [dict(row) for row in cursor.fetchall()]
+        try:
+            if upcoming_only:
+                today = datetime.now().date().isoformat()
+                query = "SELECT * FROM exams WHERE exam_date >= ? ORDER BY exam_date, exam_time"
+                rows = self._execute_query(query, (today,), fetch=True)
+            else:
+                query = "SELECT * FROM exams ORDER BY exam_date, exam_time"
+                rows = self._execute_query(query, None, fetch=True)
+            
+            if rows is None:
+                return []
+            return [dict(row) for row in rows]
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération des examens: {e}")
+            return []
     
     def get_exams_by_date_range(self, date_from: str, date_to: str) -> List[Dict]:
         """Récupère les examens dans une plage de dates"""
