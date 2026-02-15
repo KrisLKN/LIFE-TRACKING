@@ -50,16 +50,31 @@
     font-size: 1.2em;
     margin-right: 0.5em;
     transition: color 0.3s ease;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .fa-icon-large {
     font-size: 1.5em;
     margin-right: 0.3em;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .fa-icon-small {
     font-size: 0.9em;
     margin-right: 0.3em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Fallback si Font Awesome ne charge pas */
+.fa-icon:before,
+.fa-icon-large:before,
+.fa-icon-small:before {
+    content: "•";
+    display: inline-block;
+    visibility: hidden;
 }
 
 /* Titres */

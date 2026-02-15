@@ -1297,7 +1297,7 @@ elif current_page == "École":
         subheader_with_icon('fa-book', 'Gestion des Examens')
         
         # Ajouter un examen
-        with st.expander(f"{get_icon_html('fa-plus', 'small')} Ajouter un Examen", expanded=False):
+        with st.expander("➕ Ajouter un Examen", expanded=False):
             exam_name = st.text_input("Nom de l'examen", key="exam_name")
             exam_subject = st.text_input("Matière", key="exam_subject")
             col1, col2 = st.columns(2)
