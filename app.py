@@ -167,9 +167,15 @@ if current_page == "Dashboard":
     today = datetime.now().date().isoformat()
     week_start = (datetime.now() - timedelta(days=datetime.now().weekday())).date().isoformat()
     
-    all_events = db.get_all_events()
-    today_events = db.get_all_events({'date_from': today, 'date_to': today})
-    week_events = db.get_all_events({'date_from': week_start})
+    try:
+        all_events = db.get_all_events() or []
+        today_events = db.get_all_events({'date_from': today, 'date_to': today}) or []
+        week_events = db.get_all_events({'date_from': week_start}) or []
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des événements: {e}")
+        all_events = []
+        today_events = []
+        week_events = []
     
     # Métriques clés
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -182,9 +188,14 @@ if current_page == "Dashboard":
         st.progress(progress)
     
     with col2:
-        nutrition = calculate_nutrition_statistics(today_events, today)
+        try:
+            nutrition = calculate_nutrition_statistics(today_events, today) or {}
+            total_calories = nutrition.get('total_calories', 0) or 0
+        except Exception as e:
+            logger.error(f"Erreur calcul nutrition: {e}")
+            total_calories = 0
         st.markdown(f'<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">{get_icon_html("fa-utensils", "normal")} Calories Aujourd\'hui</div>', unsafe_allow_html=True)
-        st.metric("", f"{nutrition['total_calories']} kcal")
+        st.metric("", f"{total_calories} kcal")
     
     with col3:
         sleep_data = get_yesterday_sleep()
