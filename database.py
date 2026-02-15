@@ -253,6 +253,7 @@ class Database:
         """)
         
         # Table des liens/ressources
+        # Note: Foreign key désactivée pour compatibilité avec certains environnements SQLite
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS links (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -262,7 +263,6 @@ class Database:
                 tags TEXT,
                 category TEXT,
                 note_id INTEGER,
-                FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE SET NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
