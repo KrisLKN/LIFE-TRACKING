@@ -37,158 +37,249 @@ class Database:
     
     def init_database(self):
         """Initialise toutes les tables de la base de données"""
+        import json
+        import os
+        log_path = r"c:\Users\LOKOUN Kris\Desktop\projects\Task planner\.cursor\debug.log"
+        run_id = "init_db_run1"
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:38", "message": "init_database started", "data": {"db_file": self.db_file}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
+        
         conn = self.get_connection()
         cursor = conn.cursor()
         
         # Activer les foreign keys (nécessaire pour SQLite)
         # Utiliser execute() au lieu de cursor.execute() pour le PRAGMA
+        pragma_success = False
+        pragma_error = None
         try:
             conn.execute("PRAGMA foreign_keys = ON")
-        except:
-            pass  # Ignorer si non supporté
+            pragma_success = True
+        except Exception as e:
+            pragma_error = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "E", "location": "database.py:46", "message": "PRAGMA foreign_keys result", "data": {"success": pragma_success, "error": pragma_error}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table principale des événements
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS events (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type TEXT NOT NULL,
-                name TEXT NOT NULL,
-                datetime TEXT NOT NULL,
-                date TEXT NOT NULL,
-                time TEXT NOT NULL,
-                duration INTEGER DEFAULT 0,
-                notes TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        table_errors = {}
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    datetime TEXT NOT NULL,
+                    date TEXT NOT NULL,
+                    time TEXT NOT NULL,
+                    duration INTEGER DEFAULT 0,
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["events"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "B", "location": "database.py:51", "message": "CREATE TABLE events", "data": {"table": "events", "error": table_errors.get("events")}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des séances de sport
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sport_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                session_type TEXT,
-                total_duration INTEGER,
-                calories_burned INTEGER,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS sport_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    session_type TEXT,
+                    total_duration INTEGER,
+                    calories_burned INTEGER
+                )
+            """)
+        except Exception as e:
+            table_errors["sport_sessions"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:66", "message": "CREATE TABLE sport_sessions with FK", "data": {"table": "sport_sessions", "error": table_errors.get("sport_sessions"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des exercices
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS exercises (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                sets INTEGER,
-                reps INTEGER,
-                weight REAL,
-                rest_seconds INTEGER,
-                exercise_order INTEGER,
-                FOREIGN KEY (session_id) REFERENCES sport_sessions(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS exercises (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    sets INTEGER,
+                    reps INTEGER,
+                    weight REAL,
+                    rest_seconds INTEGER,
+                    exercise_order INTEGER
+                )
+            """)
+        except Exception as e:
+            table_errors["exercises"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:78", "message": "CREATE TABLE exercises with FK", "data": {"table": "exercises", "error": table_errors.get("exercises"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des activités cardio
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS cardio_activities (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id INTEGER NOT NULL,
-                activity_type TEXT,
-                duration INTEGER,
-                distance REAL,
-                calories INTEGER,
-                FOREIGN KEY (session_id) REFERENCES sport_sessions(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS cardio_activities (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id INTEGER NOT NULL,
+                    activity_type TEXT,
+                    duration INTEGER,
+                    distance REAL,
+                    calories INTEGER
+                )
+            """)
+        except Exception as e:
+            table_errors["cardio_activities"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:93", "message": "CREATE TABLE cardio_activities with FK", "data": {"table": "cardio_activities", "error": table_errors.get("cardio_activities"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des repas
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS meals (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                name TEXT,
-                calories INTEGER,
-                protein REAL,
-                carbs REAL,
-                fats REAL,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS meals (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    name TEXT,
+                    calories INTEGER,
+                    protein REAL,
+                    carbs REAL,
+                    fats REAL
+                )
+            """)
+        except Exception as e:
+            table_errors["meals"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:106", "message": "CREATE TABLE meals with FK", "data": {"table": "meals", "error": table_errors.get("meals"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des enregistrements de sommeil
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sleep_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                bedtime TEXT,
-                wake_time TEXT,
-                duration_hours REAL,
-                quality_score INTEGER,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS sleep_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    bedtime TEXT,
+                    wake_time TEXT,
+                    duration_hours REAL,
+                    quality_score INTEGER
+                )
+            """)
+        except Exception as e:
+            table_errors["sleep_records"] = str(e)
         
         # Table des enregistrements de poids
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS weight_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                weight_kg REAL,
-                body_fat_percent REAL,
-                muscle_mass_percent REAL,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS weight_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    weight_kg REAL,
+                    body_fat_percent REAL,
+                    muscle_mass_percent REAL
+                )
+            """)
+        except Exception as e:
+            table_errors["weight_records"] = str(e)
         
         # Table des enregistrements d'hydratation
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS hydration_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                amount_liters REAL,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS hydration_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    amount_liters REAL
+                )
+            """)
+        except Exception as e:
+            table_errors["hydration_records"] = str(e)
         
         # Table des sessions de travail
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS work_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                task_type TEXT,
-                productivity_score INTEGER,
-                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-            )
-        """)
+        # Note: Foreign key retirée pour compatibilité Streamlit Cloud
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS work_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id INTEGER NOT NULL,
+                    task_type TEXT,
+                    productivity_score INTEGER
+                )
+            """)
+        except Exception as e:
+            table_errors["work_sessions"] = str(e)
         
         # Table des objectifs
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS objectives (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type TEXT NOT NULL,
-                name TEXT NOT NULL,
-                target_value REAL,
-                current_value REAL DEFAULT 0,
-                deadline TEXT,
-                frequency TEXT,
-                status TEXT DEFAULT 'active',
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS objectives (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    target_value REAL,
+                    current_value REAL DEFAULT 0,
+                    deadline TEXT,
+                    frequency TEXT,
+                    status TEXT DEFAULT 'active',
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["objectives"] = str(e)
         
         # Table des rappels
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS reminders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type TEXT NOT NULL,
-                message TEXT,
-                time TEXT,
-                frequency TEXT,
-                enabled INTEGER DEFAULT 1,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS reminders (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT NOT NULL,
+                    message TEXT,
+                    time TEXT,
+                    frequency TEXT,
+                    enabled INTEGER DEFAULT 1,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["reminders"] = str(e)
         
         # Table des examens
         cursor.execute("""
@@ -225,93 +316,144 @@ class Database:
         
         # Table des devoirs/assignments
         # Note: Foreign key désactivée pour compatibilité avec certains environnements SQLite
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS assignments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                course_id INTEGER,
-                due_date TEXT,
-                due_time TEXT,
-                description TEXT,
-                status TEXT DEFAULT 'pending',
-                priority INTEGER DEFAULT 3,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS assignments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    course_id INTEGER,
+                    due_date TEXT,
+                    due_time TEXT,
+                    description TEXT,
+                    status TEXT DEFAULT 'pending',
+                    priority INTEGER DEFAULT 3,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["assignments"] = str(e)
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "B", "location": "database.py:228", "message": "CREATE TABLE assignments", "data": {"table": "assignments", "error": table_errors.get("assignments")}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
         
         # Table des notes (Second Cerveau)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS notes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                content TEXT,
-                tags TEXT,
-                category TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    content TEXT,
+                    tags TEXT,
+                    category TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["notes"] = str(e)
         
         # Table des liens/ressources
         # Note: Foreign key désactivée pour compatibilité avec certains environnements SQLite
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS links (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                url TEXT NOT NULL,
-                description TEXT,
-                tags TEXT,
-                category TEXT,
-                note_id INTEGER,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS links (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    description TEXT,
+                    tags TEXT,
+                    category TEXT,
+                    note_id INTEGER,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["links"] = str(e)
         
         # Table des éléments de connaissance (Second Cerveau)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS knowledge_items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                content TEXT,
-                type TEXT,
-                tags TEXT,
-                related_items TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS knowledge_items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    content TEXT,
+                    type TEXT,
+                    tags TEXT,
+                    related_items TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["knowledge_items"] = str(e)
         
         # Table des rappels intelligents
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS smart_reminders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_type TEXT NOT NULL,
-                event_id INTEGER,
-                reminder_type TEXT,
-                reminder_time TEXT,
-                message TEXT,
-                notification_method TEXT,
-                sent INTEGER DEFAULT 0,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS smart_reminders (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_type TEXT NOT NULL,
+                    event_id INTEGER,
+                    reminder_type TEXT,
+                    reminder_time TEXT,
+                    message TEXT,
+                    notification_method TEXT,
+                    sent INTEGER DEFAULT 0,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["smart_reminders"] = str(e)
         
         # Table de l'historique des notifications
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS notification_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                notification_type TEXT NOT NULL,
-                recipient TEXT,
-                subject TEXT,
-                message TEXT,
-                method TEXT,
-                status TEXT,
-                sent_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notification_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    notification_type TEXT NOT NULL,
+                    recipient TEXT,
+                    subject TEXT,
+                    message TEXT,
+                    method TEXT,
+                    status TEXT,
+                    sent_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        except Exception as e:
+            table_errors["notification_history"] = str(e)
         
-        conn.commit()
-        logger.info("Base de données initialisée avec succès")
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "D", "location": "database.py:313", "message": "Before commit", "data": {"table_errors": table_errors, "error_count": len(table_errors)}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
+        
+        commit_success = False
+        commit_error = None
+        try:
+            conn.commit()
+            commit_success = True
+            logger.info("Base de données initialisée avec succès")
+        except Exception as e:
+            commit_error = str(e)
+            logger.error(f"Erreur lors du commit: {e}")
+        
+        # #region agent log
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps({"runId": run_id, "hypothesisId": "D", "location": "database.py:313", "message": "After commit", "data": {"success": commit_success, "error": commit_error}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
+        except: pass
+        # #endregion
+        
+        if table_errors:
+            error_msg = f"Erreurs lors de la création des tables: {table_errors}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
     
     def migrate_from_json(self):
         """Migre les données depuis le fichier JSON existant vers SQLite"""
