@@ -111,17 +111,7 @@ class Database:
     
     def init_database(self):
         """Initialise toutes les tables de la base de données"""
-        import json
-        import os
-        log_path = r"c:\Users\LOKOUN Kris\Desktop\projects\Task planner\.cursor\debug.log"
-        run_id = "init_db_run1"
-        
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:38", "message": "init_database started", "data": {"db_file": self.db_file}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        logger.info(f"Initialisation de la base de données: {self.db_file}")
         
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -136,12 +126,10 @@ class Database:
         except Exception as e:
             pragma_error = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "E", "location": "database.py:46", "message": "PRAGMA foreign_keys result", "data": {"success": pragma_success, "error": pragma_error}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if pragma_success:
+            logger.debug("Foreign keys activées avec succès")
+        elif pragma_error:
+            logger.warning(f"Impossible d'activer les foreign keys: {pragma_error}")
         
         # Table principale des événements
         table_errors = {}
@@ -162,12 +150,8 @@ class Database:
         except Exception as e:
             table_errors["events"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "B", "location": "database.py:51", "message": "CREATE TABLE events", "data": {"table": "events", "error": table_errors.get("events")}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "events" in table_errors:
+            logger.error(f"Erreur lors de la création de la table events: {table_errors['events']}")
         
         # Table des séances de sport
         # Note: Foreign key retirée pour compatibilité Streamlit Cloud
@@ -184,12 +168,8 @@ class Database:
         except Exception as e:
             table_errors["sport_sessions"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:66", "message": "CREATE TABLE sport_sessions with FK", "data": {"table": "sport_sessions", "error": table_errors.get("sport_sessions"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "sport_sessions" in table_errors:
+            logger.error(f"Erreur lors de la création de la table sport_sessions: {table_errors['sport_sessions']}")
         
         # Table des exercices
         # Note: Foreign key retirée pour compatibilité Streamlit Cloud
@@ -209,12 +189,8 @@ class Database:
         except Exception as e:
             table_errors["exercises"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:78", "message": "CREATE TABLE exercises with FK", "data": {"table": "exercises", "error": table_errors.get("exercises"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "exercises" in table_errors:
+            logger.error(f"Erreur lors de la création de la table exercises: {table_errors['exercises']}")
         
         # Table des activités cardio
         # Note: Foreign key retirée pour compatibilité Streamlit Cloud
@@ -232,12 +208,8 @@ class Database:
         except Exception as e:
             table_errors["cardio_activities"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:93", "message": "CREATE TABLE cardio_activities with FK", "data": {"table": "cardio_activities", "error": table_errors.get("cardio_activities"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "cardio_activities" in table_errors:
+            logger.error(f"Erreur lors de la création de la table cardio_activities: {table_errors['cardio_activities']}")
         
         # Table des repas
         # Note: Foreign key retirée pour compatibilité Streamlit Cloud
@@ -256,12 +228,8 @@ class Database:
         except Exception as e:
             table_errors["meals"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "A", "location": "database.py:106", "message": "CREATE TABLE meals with FK", "data": {"table": "meals", "error": table_errors.get("meals"), "has_foreign_key": True}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "meals" in table_errors:
+            logger.error(f"Erreur lors de la création de la table meals: {table_errors['meals']}")
         
         # Table des enregistrements de sommeil
         # Note: Foreign key retirée pour compatibilité Streamlit Cloud
@@ -407,12 +375,8 @@ class Database:
         except Exception as e:
             table_errors["assignments"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "B", "location": "database.py:228", "message": "CREATE TABLE assignments", "data": {"table": "assignments", "error": table_errors.get("assignments")}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if "assignments" in table_errors:
+            logger.error(f"Erreur lors de la création de la table assignments: {table_errors['assignments']}")
         
         # Table des notes (Second Cerveau)
         try:
@@ -500,12 +464,8 @@ class Database:
         except Exception as e:
             table_errors["notification_history"] = str(e)
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "D", "location": "database.py:313", "message": "Before commit", "data": {"table_errors": table_errors, "error_count": len(table_errors)}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        if table_errors:
+            logger.warning(f"Erreurs détectées lors de la création des tables: {len(table_errors)} erreur(s)")
         
         commit_success = False
         commit_error = None
@@ -517,12 +477,7 @@ class Database:
             commit_error = str(e)
             logger.error(f"Erreur lors du commit: {e}")
         
-        # #region agent log
-        try:
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps({"runId": run_id, "hypothesisId": "D", "location": "database.py:313", "message": "After commit", "data": {"success": commit_success, "error": commit_error}, "timestamp": int(__import__('time').time() * 1000)}) + "\n")
-        except: pass
-        # #endregion
+        # Logging du résultat du commit déjà géré ci-dessus
         
         if table_errors:
             error_msg = f"Erreurs lors de la création des tables: {table_errors}"
