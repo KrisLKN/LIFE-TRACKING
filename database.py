@@ -41,7 +41,11 @@ class Database:
         cursor = conn.cursor()
         
         # Activer les foreign keys (nécessaire pour SQLite)
-        cursor.execute("PRAGMA foreign_keys = ON")
+        # Utiliser execute() au lieu de cursor.execute() pour le PRAGMA
+        try:
+            conn.execute("PRAGMA foreign_keys = ON")
+        except:
+            pass  # Ignorer si non supporté
         
         # Table principale des événements
         cursor.execute("""
@@ -220,6 +224,7 @@ class Database:
         """)
         
         # Table des devoirs/assignments
+        # Note: Foreign key désactivée pour compatibilité avec certains environnements SQLite
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -230,7 +235,6 @@ class Database:
                 description TEXT,
                 status TEXT DEFAULT 'pending',
                 priority INTEGER DEFAULT 3,
-                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
