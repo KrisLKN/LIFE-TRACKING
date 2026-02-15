@@ -1,0 +1,254 @@
+/* ============================================
+   DESIGN MINIMALISTE NOIR/BLANC
+   Mode clair et mode nuit
+   ============================================ */
+
+:root {
+    /* Mode clair */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F5F5F5;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-color: #E0E0E0;
+    --icon-color: #000000;
+    --accent-color: #000000;
+    --shadow: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+    /* Mode nuit */
+    --bg-primary: #1E1E1E;
+    --bg-secondary: #2D2D2D;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E0E0E0;
+    --border-color: #404040;
+    --icon-color: #FFFFFF;
+    --accent-color: #FFFFFF;
+    --shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Application globale */
+.stApp {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+}
+
+[data-testid="stSidebar"] .css-1d391kg {
+    background-color: var(--bg-secondary);
+}
+
+/* Icônes Font Awesome */
+.fa-icon {
+    color: var(--icon-color);
+    font-size: 1.2em;
+    margin-right: 0.5em;
+    transition: color 0.3s ease;
+}
+
+.fa-icon-large {
+    font-size: 1.5em;
+    margin-right: 0.3em;
+}
+
+.fa-icon-small {
+    font-size: 0.9em;
+    margin-right: 0.3em;
+}
+
+/* Titres */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Texte */
+p, span, div, label {
+    color: var(--text-primary);
+}
+
+/* Métriques */
+[data-testid="stMetricValue"] {
+    color: var(--text-primary);
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary);
+}
+
+/* Boutons */
+.stButton > button {
+    background-color: var(--accent-color);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* Inputs */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stSelectbox > div > div > select,
+.stNumberInput > div > div > input,
+.stDateInput > div > div > input,
+.stTimeInput > div > div > input {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stSelectbox > div > div > select:focus,
+.stNumberInput > div > div > input:focus,
+.stDateInput > div > div > input:focus,
+.stTimeInput > div > div > input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--shadow);
+}
+
+/* Cards et Expanders */
+[data-testid="stExpander"] {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+/* Progress bars */
+[data-testid="stProgressBar"] > div > div {
+    background-color: var(--accent-color);
+}
+
+/* Graphiques Plotly - ajustement pour mode nuit */
+.plotly {
+    background-color: var(--bg-primary);
+}
+
+/* Toggle mode nuit */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Séparateurs */
+hr {
+    border-color: var(--border-color);
+    margin: 1.5rem 0;
+}
+
+/* Info boxes */
+.stAlert {
+    background-color: var(--bg-secondary);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 4px;
+}
+
+/* Tables */
+[data-testid="stDataFrame"] {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Radio buttons et checkboxes */
+.stRadio > label,
+.stCheckbox > label {
+    color: var(--text-primary);
+}
+
+/* Sliders */
+.stSlider > div > div {
+    background-color: var(--bg-secondary);
+}
+
+.stSlider > div > div > div {
+    background-color: var(--accent-color);
+}
+
+/* Tabs */
+[data-baseweb="tab-list"] {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-baseweb="tab"] {
+    color: var(--text-primary);
+}
+
+[data-baseweb="tab"]:hover {
+    background-color: var(--bg-primary);
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Utilitaires */
+.minimal-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.icon-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
