@@ -28,12 +28,31 @@ class Database:
     
     def get_connection(self):
         """Obtient une connexion à la base de données"""
+        # Vérifier si la connexion existe et est valide
         if self.conn is None:
-            self.conn = sqlite3.connect(self.db_file)
-            self.conn.row_factory = sqlite3.Row
-            # Activer les foreign keys
-            self.conn.execute("PRAGMA foreign_keys = ON")
+            self._create_connection()
+        else:
+            # Vérifier si la connexion est toujours valide
+            try:
+                self.conn.execute("SELECT 1")
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError):
+                # La connexion est invalide, en créer une nouvelle
+                try:
+                    self.conn.close()
+                except:
+                    pass
+                self._create_connection()
         return self.conn
+    
+    def _create_connection(self):
+        """Crée une nouvelle connexion à la base de données"""
+        self.conn = sqlite3.connect(self.db_file, check_same_thread=False)
+        self.conn.row_factory = sqlite3.Row
+        # Activer les foreign keys (même si on ne les utilise plus, c'est bon pour la compatibilité)
+        try:
+            self.conn.execute("PRAGMA foreign_keys = ON")
+        except:
+            pass  # Ignorer si non supporté
     
     def init_database(self):
         """Initialise toutes les tables de la base de données"""
