@@ -31,12 +31,17 @@ class Database:
         if self.conn is None:
             self.conn = sqlite3.connect(self.db_file)
             self.conn.row_factory = sqlite3.Row
+            # Activer les foreign keys
+            self.conn.execute("PRAGMA foreign_keys = ON")
         return self.conn
     
     def init_database(self):
         """Initialise toutes les tables de la base de données"""
         conn = self.get_connection()
         cursor = conn.cursor()
+        
+        # Activer les foreign keys (nécessaire pour SQLite)
+        cursor.execute("PRAGMA foreign_keys = ON")
         
         # Table principale des événements
         cursor.execute("""
