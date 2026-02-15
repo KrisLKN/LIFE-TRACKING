@@ -1332,7 +1332,7 @@ elif current_page == "École":
                     notification_method="both"
                 )
                 
-                st.success(f"{get_icon_html('fa-check', 'small')} Examen '{exam_name}' ajouté avec rappel configuré!")
+                st.success(f"✅ Examen '{exam_name}' ajouté avec rappel configuré!")
                 st.rerun()
         
         # Statistiques
