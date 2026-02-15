@@ -138,13 +138,22 @@ def get_theme_css() -> str:
 
 def inject_font_awesome() -> str:
     """
-    Injecte Font Awesome CDN dans la page
+    Injecte Font Awesome CDN dans la page avec fallback
     """
     return """
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
           crossorigin="anonymous" 
           referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <script>
+        // Vérifier si Font Awesome est chargé
+        window.addEventListener('load', function() {
+            if (!document.querySelector('link[href*="font-awesome"]')) {
+                console.warn('Font Awesome non chargé, utilisation des emojis');
+            }
+        });
+    </script>
     """
 
 def inject_custom_css() -> str:

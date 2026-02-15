@@ -41,8 +41,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Injection de Font Awesome et CSS personnalisé
-st.markdown(inject_font_awesome(), unsafe_allow_html=True)
+# Injection de Font Awesome et CSS personnalisé dans le head
+st.markdown("""
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+              integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+              crossorigin="anonymous" 
+              referrerpolicy="no-referrer" />
+        <style>
+            .fa-icon, .fa-icon-small, .fa-icon-large {
+                display: inline-block;
+                margin-right: 0.5rem;
+            }
+            .fa-icon-small { font-size: 0.9em; }
+            .fa-icon { font-size: 1.2em; }
+            .fa-icon-large { font-size: 1.5em; }
+        </style>
+    </head>
+""", unsafe_allow_html=True)
 st.markdown(inject_custom_css(), unsafe_allow_html=True)
 
 # Initialisation du thème
@@ -97,15 +113,15 @@ st.sidebar.markdown(f"""
 
 # Toggle mode nuit
 st.sidebar.markdown("---")
-dark_mode_icon = 'fa-moon' if not is_dark_mode() else 'fa-sun'
+dark_mode_emoji = '🌙' if not is_dark_mode() else '☀️'
 dark_mode_text = "Mode Nuit" if not is_dark_mode() else "Mode Jour"
-if st.sidebar.button(f"{get_icon_html(dark_mode_icon, 'normal')} {dark_mode_text}", use_container_width=True):
+if st.sidebar.button(f"{dark_mode_emoji} {dark_mode_text}", use_container_width=True):
     toggle_dark_mode()
     st.rerun()
 
 st.sidebar.markdown("---")
 
-# Navigation avec icônes
+# Navigation avec icônes (utiliser emojis pour les radio buttons car Streamlit ne supporte pas HTML dans les labels)
 page_options = [
     ("🏠", "fa-home", "Dashboard"),
     ("➕", "fa-plus", "Ajouter Événement"),
@@ -120,13 +136,13 @@ page_options = [
     ("⚙️", "fa-gear", "Configuration")
 ]
 
-page_labels = [f"{get_icon_html(icon, 'normal')} {label}" for _, icon, label in page_options]
-page = st.sidebar.radio("Choisir une page", page_labels, index=0, format_func=lambda x: x)
+# Utiliser emojis pour les radio buttons (Streamlit ne supporte pas HTML dans les labels)
+page_labels = [f"{emoji} {label}" for emoji, _, label in page_options]
+page = st.sidebar.radio("Choisir une page", page_labels, index=0)
 
-# Extraire le nom de la page sans l'icône HTML pour les comparaisons
-page_names = [label for _, _, label in page_options]
+# Extraire le nom de la page pour les comparaisons
 page_index = page_labels.index(page) if page in page_labels else 0
-current_page = page_names[page_index]
+current_page = page_options[page_index][2]  # Le label (nom de la page)
 
 # Fonction helper pour subheader avec icône
 def subheader_with_icon(icon_name, text):
@@ -377,8 +393,8 @@ elif current_page == "Ajouter Événement":
         
         session_type = st.selectbox("Type de séance", SPORT_SESSION_TYPES)
         
-        # Onglets pour Musculation et Cardio
-        tab1, tab2 = st.tabs([f"{get_icon_html('fa-dumbbell', 'small')} Musculation", f"{get_icon_html('fa-running', 'small')} Cardio"])
+        # Onglets pour Musculation et Cardio (emojis car Streamlit ne supporte pas HTML dans les tabs)
+        tab1, tab2 = st.tabs(["💪 Musculation", "🏃 Cardio"])
         
         with tab1:
             st.write("Ajouter des exercices")
@@ -931,7 +947,7 @@ elif current_page == "Objectifs":
         </h2>
     """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs([f"{get_icon_html('fa-clipboard-list', 'small')} Mes Objectifs", f"{get_icon_html('fa-plus', 'small')} Créer un Objectif"])
+    tab1, tab2 = st.tabs(["📋 Mes Objectifs", "➕ Créer un Objectif"])
     
     with tab1:
         objectives = db.get_all_objectives(status='active')
@@ -1212,7 +1228,7 @@ elif current_page == "Rappels":
         </h2>
     """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs([f"{get_icon_html('fa-clipboard-list', 'small')} Mes Rappels", f"{get_icon_html('fa-plus', 'small')} Créer un Rappel"])
+    tab1, tab2 = st.tabs(["📋 Mes Rappels", "➕ Créer un Rappel"])
     
     with tab1:
         reminders = db.get_all_reminders(enabled_only=False)
@@ -1271,10 +1287,10 @@ elif current_page == "École":
     """, unsafe_allow_html=True)
     
     tab1, tab2, tab3, tab4 = st.tabs([
-        f"{get_icon_html('fa-book', 'small')} Examens",
-        f"{get_icon_html('fa-book-open', 'small')} Cours",
-        f"{get_icon_html('fa-file-lines', 'small')} Devoirs",
-        f"{get_icon_html('fa-bowl-food', 'small')} Rappel Tupperware"
+        "📚 Examens",
+        "📖 Cours",
+        "📝 Devoirs",
+        "🍱 Rappel Tupperware"
     ])
     
     with tab1:
@@ -1738,9 +1754,9 @@ elif current_page == "Second Cerveau":
     """, unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs([
-        f"{get_icon_html('fa-file-lines', 'small')} Notes",
-        f"{get_icon_html('fa-link', 'small')} Liens",
-        f"{get_icon_html('fa-lightbulb', 'small')} Connaissances"
+        "📝 Notes",
+        "🔗 Liens",
+        "💡 Connaissances"
     ])
     
     with tab1:
@@ -1892,9 +1908,9 @@ elif current_page == "Configuration":
     """, unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs([
-        f"{get_icon_html('fa-envelope', 'small')} Email",
-        f"{get_icon_html('fa-comment', 'small')} Telegram",
-        f"{get_icon_html('fa-clock-rotate-left', 'small')} Historique"
+        "📧 Email",
+        "💬 Telegram",
+        "📜 Historique"
     ])
     
     with tab1:
