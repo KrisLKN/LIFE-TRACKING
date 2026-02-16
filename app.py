@@ -1833,13 +1833,13 @@ elif current_page == "Second Cerveau":
         if search_query:
             notes = db.search_notes(search_query)
         else:
-        notes = safe_db_operation(
-            lambda: db.get_all_notes(
-                category=filter_category if filter_category != "Toutes" else None,
-                tag=filter_tag if filter_tag else None
-            ),
-            []
-        )
+            notes = safe_db_operation(
+                lambda: db.get_all_notes(
+                    category=filter_category if filter_category != "Toutes" else None,
+                    tag=filter_tag if filter_tag else None
+                ),
+                []
+            )
         
         if notes:
             for note in notes:
